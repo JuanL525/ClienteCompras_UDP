@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.text.Font?>
+
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="314.0" prefWidth="508.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="entidades.Cliente">
+   <children>
+      <TextField fx:id="txtCédula" layoutX="180.0" layoutY="138.0" />
+      <Label fx:id="lblRespuesta" layoutX="180.0" layoutY="165.0" text=" " textFill="red">
+         <font>
+            <Font size="18.0"/>
+         </font>
+      </Label>
+      <Text layoutX="176.0" layoutY="107.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Ingresar Cédula">
+         <font>
+            <Font size="20.0" />
+         </font>
+      </Text>
+      <Button layoutX="100.0" layoutY="217.0" mnemonicParsing="false" text="Buscar Usuario" onAction="#buscar"/>
+      <Button layoutX="220.0" layoutY="217.0" mnemonicParsing="false" text="Registrar Usuario" onAction="#registrar"/>
+      <Button layoutX="360.0" layoutY="217.0" mnemonicParsing="false" text="Montos / Pagos" onAction="#irAMontos"/>
+   </children>
+</Pane>
