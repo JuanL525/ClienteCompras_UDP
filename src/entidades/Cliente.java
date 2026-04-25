@@ -14,6 +14,7 @@ import javafx.stage.Stage;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.sql.Connection;
 
 public class Cliente {
 
@@ -74,31 +75,32 @@ public class Cliente {
             return;
         }
 
-        try {
-            String tramaBuscar = "CONSULTAR " + cedula;
-            String resultado = enviarUDP(IP_SERVIDOR, PUERTO, tramaBuscar);
-            
-            if (resultado.isEmpty() || resultado.contains("ERROR")) {
-                lblRespuesta.setText("Error/No encontrado: " + resultado);
+        try (Connection conn = ConexionDB.conectar()) {
+            String sql = "SELECT * FROM clientes WHERE cedula = ?";
+            java.sql.PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, cedula);
+
+            java.sql.ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                String datos = "Nombre: " + rs.getString("nombre") +
+                        "\nCorreo: " + rs.getString("correo") +
+                        "\nMonto Tarjeta: $" + rs.getDouble("monto_tarjeta");
+
+                // Cargar vista resultado.fxml igual que ahora
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/resultado.fxml"));
+                Parent root = loader.load();
+                ClienteResultado controladorResultado = loader.getController();
+                controladorResultado.setDatos(datos);
+
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                stage.setScene(new Scene(root));
+                stage.show();
             } else {
-                try {
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/resultado.fxml"));
-                    Parent root = loader.load();
-
-                    ClienteResultado controladorResultado = loader.getController();
-                    controladorResultado.setDatos(resultado);
-
-                    Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                    stage.setScene(new Scene(root));
-                    stage.show();
-                } catch (Exception ex) {
-                    System.out.println("Vista resultado.fxml no encontrada o error al cargar.");
-                    ex.printStackTrace();
-                    lblRespuesta.setText("Encontrado: " + resultado);
-                }
+                lblRespuesta.setText("Error: Cliente no encontrado.");
             }
         } catch (Exception e) {
-            lblRespuesta.setText("Error al conectar con el servidor");
+            lblRespuesta.setText("Error al conectar con la base de datos");
             e.printStackTrace();
         }
     }
@@ -160,13 +162,21 @@ public class Cliente {
             return;
         }
 
-        try {
-            String trama = "REGISTRAR " + cedula + ";" + nombre + ";" + correo + ";" + telefono + ";" + preferencia;
-            String resultado = enviarUDP(IP_SERVIDOR, PUERTO, trama);
-            
-            lblRegistroRespuesta.setText("Respuesta: " + resultado);
+        try (Connection conn = ConexionDB.conectar()) {
+            String sql = "INSERT INTO clientes (cedula, nombre, correo, telefono, preferencia) VALUES (?, ?, ?, ?, ?)";
+            java.sql.PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, cedula);
+            pstmt.setString(2, nombre);
+            pstmt.setString(3, correo);
+            pstmt.setString(4, telefono);
+            pstmt.setString(5, preferencia);
+
+            int filasInsertadas = pstmt.executeUpdate();
+            if (filasInsertadas > 0) {
+                lblRegistroRespuesta.setText("Respuesta: Registro exitoso en Supabase.");
+            }
         } catch (Exception e) {
-            lblRegistroRespuesta.setText("Error al conectar con servidor.");
+            lblRegistroRespuesta.setText("Error: La cédula ya existe o falló la conexión.");
             e.printStackTrace();
         }
     }
