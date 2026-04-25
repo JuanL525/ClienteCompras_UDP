@@ -11,10 +11,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 public class Cliente {
 
@@ -36,36 +35,13 @@ public class Cliente {
     @FXML
     private TextField txtRegistroTelefono;
 
-
     @FXML
     private CheckBox chkRegistroPreferencia;
 
     @FXML
     private Label lblRegistroRespuesta;
 
-    private final String IP_SERVIDOR = "172.31.116.72";
-    private final int PUERTO = 5000;
-
-    public String enviarUDP(String IP, int puerto, String mensaje) throws Exception {
-        DatagramSocket socket = new DatagramSocket();
-        InetAddress direccion = InetAddress.getByName(IP);
-
-        byte[] buferS = mensaje.getBytes();
-        DatagramPacket salida = new DatagramPacket(buferS, buferS.length, direccion, puerto);
-        socket.send(salida);
-
-        byte[] bufferE = new byte[1024];
-        DatagramPacket entrada = new DatagramPacket(bufferE, bufferE.length);
-
-        socket.setSoTimeout(3000);
-
-        try {
-            socket.receive(entrada);
-            return new String(entrada.getData(), 0, entrada.getLength()).trim();
-        } finally {
-            socket.close();
-        }
-    }
+    // Se eliminaron IP_SERVIDOR, PUERTO y el método enviarUDP
 
     @FXML
     public void buscar(ActionEvent event) {
@@ -77,17 +53,16 @@ public class Cliente {
 
         try (Connection conn = ConexionDB.conectar()) {
             String sql = "SELECT * FROM clientes WHERE cedula = ?";
-            java.sql.PreparedStatement pstmt = conn.prepareStatement(sql);
+            PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, cedula);
 
-            java.sql.ResultSet rs = pstmt.executeQuery();
+            ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()) {
                 String datos = "Nombre: " + rs.getString("nombre") +
                         "\nCorreo: " + rs.getString("correo") +
                         "\nMonto Tarjeta: $" + rs.getDouble("monto_tarjeta");
 
-                // Cargar vista resultado.fxml igual que ahora
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/resultado.fxml"));
                 Parent root = loader.load();
                 ClienteResultado controladorResultado = loader.getController();
@@ -110,7 +85,7 @@ public class Cliente {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/registrar.fxml"));
             Parent root = loader.load();
-            
+
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
@@ -130,10 +105,10 @@ public class Cliente {
         String preferencia = chkRegistroPreferencia.isSelected() ? "SI" : "NO";
         String telefono = txtRegistroTelefono.getText();
 
-        if (nombre == null || nombre.trim().isEmpty() || 
-            cedula == null || cedula.trim().isEmpty() || 
-            correo == null || correo.trim().isEmpty() ||
-            telefono == null || telefono.trim().isEmpty()) {
+        if (nombre == null || nombre.trim().isEmpty() ||
+                cedula == null || cedula.trim().isEmpty() ||
+                correo == null || correo.trim().isEmpty() ||
+                telefono == null || telefono.trim().isEmpty()) {
             lblRegistroRespuesta.setText("Por favor llenar todos los campos.");
             return;
         }
@@ -164,7 +139,7 @@ public class Cliente {
 
         try (Connection conn = ConexionDB.conectar()) {
             String sql = "INSERT INTO clientes (cedula, nombre, correo, telefono, preferencia) VALUES (?, ?, ?, ?, ?)";
-            java.sql.PreparedStatement pstmt = conn.prepareStatement(sql);
+            PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, cedula);
             pstmt.setString(2, nombre);
             pstmt.setString(3, correo);
@@ -186,7 +161,7 @@ public class Cliente {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/montos.fxml"));
             Parent root = loader.load();
-            
+
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
@@ -203,7 +178,7 @@ public class Cliente {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/buscar.fxml"));
             Parent root = loader.load();
-            
+
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();

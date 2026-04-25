@@ -103,8 +103,6 @@ public class ClienteMontos {
         }
     }
 
-    // Mantenemos el nombre consultarDeuda para no tener que modificar el FXML,
-    // pero internamente consulta el "Saldo" o "Monto"
     @FXML
     public void consultarDeuda(ActionEvent event) {
         String cedula = txtMontoCedula.getText();
@@ -122,7 +120,6 @@ public class ClienteMontos {
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
                 double saldo = rs.getDouble("monto_tarjeta");
-                // Usamos String.format para mostrar siempre 2 decimales
                 lblMontoRespuesta.setText(String.format("El saldo disponible en su tarjeta es: $%.2f", saldo));
             } else {
                 lblMontoRespuesta.setText("Error: Cliente no encontrado.");
