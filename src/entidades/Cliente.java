@@ -41,7 +41,6 @@ public class Cliente {
     @FXML
     private Label lblRegistroRespuesta;
 
-    // Se eliminaron IP_SERVIDOR, PUERTO y el método enviarUDP
 
     @FXML
     public void buscar(ActionEvent event) {
